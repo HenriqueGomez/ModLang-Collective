@@ -1,0 +1,42 @@
+{
+  "schemaVersion": 1,
+  "modId": "example",
+  "modVersion": "1.0.0",
+  "targetLocale": "pt_br",
+  "namespaces": {
+    "example": {
+      "sourceLocale": "en_us",
+      "sourcePath": "assets/example/lang/en_us.json",
+      "entries": {
+        "example.pending": {
+          "sourceText": "New message",
+          "sourceHistory": [],
+          "translation": null,
+          "bundledTranslation": "Nova mensagem",
+          "state": "PENDING"
+        },
+        "example.empty": {
+          "sourceText": "Optional label",
+          "sourceHistory": [],
+          "translation": "",
+          "bundledTranslation": null,
+          "state": "TRANSLATED"
+        },
+        "example.changed": {
+          "sourceText": "Hello, %s!",
+          "sourceHistory": ["Hello!"],
+          "translation": "Olá!",
+          "bundledTranslation": null,
+          "state": "NEEDS_REVIEW"
+        },
+        "example.removed": {
+          "sourceText": "Old message",
+          "sourceHistory": [],
+          "translation": "Mensagem antiga",
+          "bundledTranslation": null,
+          "state": "ARCHIVED"
+        }
+      }
+    }
+  }
+}

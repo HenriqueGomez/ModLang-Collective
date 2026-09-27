@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "modlangcollective",
+  "version": "${version}",
+  "name": "ModLang Collective",
+  "description": "Community-powered mod translation by Kito Mods. Create, edit, and apply local translations for your installed mods.",
+  "authors": [
+    "Kito Mods"
+  ],
+  "license": "MIT",
+  "environment": "client",
+  "mixins": [
+    "modlangcollective.client.mixins.json"
+  ],
+  "entrypoints": {
+    "client": [
+      "dev.kitomods.modlangcollective.client.ModLangCollectiveClient"
+    ],
+    "modmenu": [
+      "dev.kitomods.modlangcollective.client.integration.ModMenuIntegration"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "~26.2",
+    "java": ">=25"
+  }
+}

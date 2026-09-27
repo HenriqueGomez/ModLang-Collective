@@ -1,0 +1,9 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "dev.kitomods.modlangcollective.client.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "plugin": "dev.kitomods.modlangcollective.client.mixin.OptionalIntegrationPlugin",
+  "client": ["ModMenuScreenMixin", "ClientLanguageMixin"],
+  "injectors": {"defaultRequire": 1}
+}

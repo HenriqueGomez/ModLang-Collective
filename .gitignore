@@ -1,21 +1,56 @@
-.gradle
+# Local agent configuration and instructions
+.codex/
+AGENTS.md
+AGENTS.override.md
+
+# Private research, references, tooling, and generated reports
+/.local/
+/research/
+/local-tools/
+/captures/
+
+# Gradle caches and build output
+.gradle/
 **/build/
 !**/src/**/build/
-
-# Ignore Gradle GUI config
 gradle-app.setting
-
-# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
-
-# Avoid ignore Gradle wrappper properties
-!gradle-wrapper.properties
-
-# Cache of project
 .gradletasknamecache
+/out/
 
-# Eclipse Gradle plugin generated files
-# Eclipse Core
+# Local Minecraft installations and development runs
+/run/
+/runs/
+/mods/
+/resourcepacks/
+/saves/
+/logs/
+/crash-reports/
+*.log
+
+# IDE and machine-specific settings
+.idea/
+.vscode/
+*.iml
 .project
-# JDT-specific (Eclipse Java Development Tools)
 .classpath
+.settings/
+local.properties
+
+# Local credentials and environment files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local binaries; keep the reproducible Gradle bootstrap
+*.class
+*.jar
+!/gradle/wrapper/gradle-wrapper.jar
+
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini

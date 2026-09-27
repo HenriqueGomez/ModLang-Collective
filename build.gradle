@@ -1,0 +1,133 @@
+plugins {
+    id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = 'modlang-collective'
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        url = 'https://maven.terraformersmc.com/releases/'
+        content { includeGroup 'com.terraformersmc' }
+    }
+}
+
+loom {
+    splitEnvironmentSourceSets()
+    mods {
+        modlangcollective {
+            sourceSet sourceSets.main
+            sourceSet sourceSets.client
+        }
+    }
+}
+
+sourceSets {
+    tools {
+        java.srcDir 'src/tools/java'
+        compileClasspath += sourceSets.main.output
+        compileClasspath += sourceSets.client.compileClasspath
+        runtimeClasspath += sourceSets.main.output
+    }
+}
+
+configurations {
+    toolsImplementation.extendsFrom implementation
+    toolsRuntimeOnly.extendsFrom runtimeOnly
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${minecraft_version}"
+    implementation "net.fabricmc:fabric-loader:${loader_version}"
+    // Minecraft supplies this exact Gson version; do not bundle a duplicate.
+    implementation "com.google.code.gson:gson:${gson_version}"
+    clientCompileOnly("com.terraformersmc:modmenu:${modmenu_version}") { transitive = false }
+    testImplementation platform("org.junit:junit-bom:${junit_version}")
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testImplementation sourceSets.tools.output
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    testLogging {
+        events 'failed', 'skipped'
+    }
+}
+
+processResources {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') {
+        expand(version: project.version)
+    }
+}
+
+tasks.withType(Jar).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+jar {
+    from('LICENSE') { rename { 'LICENSE_modlangcollective' } }
+}
+
+tasks.register('auditReferenceMods', JavaExec) {
+    group = 'verification'
+    description = 'Read local reference JARs without launching Minecraft; write an ignored discovery report.'
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'dev.kitomods.modlangcollective.tools.DiscoveryAudit'
+    doFirst {
+        def referenceDir = providers.gradleProperty('referenceModsDir').orNull
+        if (!referenceDir) {
+            def localSettings = file('.local/settings.json')
+            if (localSettings.exists()) {
+                referenceDir = new groovy.json.JsonSlurper().parse(localSettings).referenceModsDirectory
+            }
+        }
+        if (!referenceDir) {
+            throw new GradleException('Set referenceModsDir or referenceModsDirectory in .local/settings.json.')
+        }
+        args '--mods', referenceDir, '--report', file('.local/reports/discovery-audit.json').absolutePath
+    }
+}
+
+tasks.register('verifyClientIntegration', JavaExec) {
+    group = 'verification'
+    description = 'Check client hook signatures and optional integration metadata without launching Minecraft.'
+    classpath = sourceSets.tools.runtimeClasspath + sourceSets.client.output + sourceSets.client.compileClasspath
+    mainClass = 'dev.kitomods.modlangcollective.tools.ClientIntegrationAudit'
+}
+
+tasks.named('check') { dependsOn 'verifyClientIntegration' }
+
+tasks.register('auditRuntimeProject', JavaExec) {
+    group = 'verification'
+    description = 'Read-only projection check for a saved local project against top-level reference JARs.'
+    classpath = sourceSets.tools.runtimeClasspath
+    mainClass = 'dev.kitomods.modlangcollective.tools.RuntimeProjectAudit'
+    doFirst {
+        def referenceDir = providers.gradleProperty('referenceModsDir').orNull
+        if (!referenceDir && file('.local/settings.json').exists()) {
+            referenceDir = new groovy.json.JsonSlurper().parse(file('.local/settings.json')).referenceModsDirectory
+        }
+        def modId = providers.gradleProperty('auditModId').orNull
+        def locale = providers.gradleProperty('auditLocale').orNull
+        if (!referenceDir || !modId || !locale) throw new GradleException('Set referenceModsDir, auditModId, and auditLocale.')
+        args referenceDir, modId, locale
+    }
+}
